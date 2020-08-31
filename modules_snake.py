@@ -1,11 +1,12 @@
 import pygame
 import math
 
-global BLACK,BLUE,RED,GREEN
+global BLACK,BLUE,RED,GREEN, WHITE
 BLACK = (0,0,0)
 BLUE = (0,0,255)
 RED = (255,0,0)
 GREEN = (0,255,0)
+WHITE = (0,0,0)
 
 
 class score():
@@ -17,11 +18,10 @@ class score():
         self.score += cambio
         
     def dibujarScore(self,display):        
-        myfont = pygame.font.SysFont('Comic Sans MS', 20) 
+        myfont = pygame.font.SysFont('Comic Sans MS', 30) 
         texto = 'Score :'+str(self.score)
-        textsurface = myfont.render(texto, True, GREEN)        
-        #width_display = display.get_width()        
-        display.fill(textsurface,(250,250))
+        textsurface = myfont.render(texto, True, GREEN)                      
+        display.blit(textsurface,(410,10))        
         
     def verificarPunto(self,Food,Snake):
         coord_Food = Food.getCoord()
@@ -49,6 +49,9 @@ class snake():
         
     def getBody(self):
         return self.Body
+
+    def getSnakeLenght(self):
+        return len(self.Body)
     
     def getCoordBody(self):
         return [i.getCoord() for i in self.Body]
@@ -97,7 +100,7 @@ class snake():
             
     def dibujarSnake(self,display):
         for i in self.Body:
-            pygame.draw.rect(display,BLUE,(i.coordx,i.coordy,self.height,self.width))
+            pygame.draw.rect(display,GREEN,(i.coordx,i.coordy,self.height,self.width))
             
     def agregarBody(self):
         coord = self.getCoordElement(-1)
