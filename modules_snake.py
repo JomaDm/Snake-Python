@@ -22,7 +22,7 @@ class score():
         myfont = pygame.font.SysFont('Comic Sans MS', 30)
         texto = 'Score :'+str(self.score)
         textsurface = myfont.render(texto, True, GREEN)
-        display.blit(textsurface, (410, 10))
+        display.blit(textsurface, (10, 10))
 
     def verificarPunto(self, Food, Snake):
         coord_Food = Food.getCoord()
@@ -40,6 +40,8 @@ class score():
             if(math.fabs(cabeza[0] - coord_snake[i][0]) < 10 and math.fabs(cabeza[1] - coord_snake[i][1]) < 10):
                 return True, i
         return False, 0
+    
+    
 
 
 class snake():
