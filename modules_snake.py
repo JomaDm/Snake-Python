@@ -1,5 +1,6 @@
 import pygame
 import math
+import os
 
 global BLACK, BLUE, RED, GREEN, WHITE
 BLACK = (0, 0, 0)
@@ -11,7 +12,27 @@ WHITE = (0, 0, 0)
 
 class score():
     score = 0
+    best_score = 0
+    def __init__(self):
+        try:
+            os.system("touch scores.txt")                              
+        except :
+            print("Ocurrio un error al intentar leer los scores del archivo scores.txt")
 
+        archivo_scores = open("scores.txt","r")
+        mejor = archivo_scores.read()      
+        
+        if(mejor):
+            self.best_score = int(mejor)
+        
+        archivo_scores.close()
+    
+    def guardarScore(self):
+        if(self.score > self.best_score):
+            archivo_scores = open("scores.txt","w")
+            archivo_scores.write(str(self.score))
+            archivo_scores.close()
+            
     def showScore(self):
         return score
 
@@ -23,6 +44,12 @@ class score():
         texto = 'Score :'+str(self.score)
         textsurface = myfont.render(texto, True, GREEN)
         display.blit(textsurface, (10, 10))
+        
+        myfont = pygame.font.SysFont('Comic Sans MS', 30)
+        texto = 'Best Score :'+str(self.best_score)
+        textsurface = myfont.render(texto, True, GREEN)
+        display.blit(textsurface, (10, 30))
+        
 
     def verificarPunto(self, Food, Snake):
         coord_Food = Food.getCoord()

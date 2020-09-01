@@ -48,6 +48,7 @@ if __name__ == "__main__":
                         diry = -10
                 elif(evento.key == pygame.K_ESCAPE):
                     game_over = True
+                    Score.guardarScore()
 
         Snake.mover(dirx, diry)
         Snake.dibujarSnake(display)
