@@ -10,28 +10,29 @@ GREEN = (0, 255, 0)
 WHITE = (0, 0, 0)
 
 
-class score():
+class Score():
     score = 0
     best_score = 0
     def __init__(self):
+        mejor = None
         try:
-            os.system("touch scores.txt")                              
+            archivo_scores = open("scores.txt","r+")
+            mejor = archivo_scores.read()                                                    
+            archivo_scores.close()
         except :
             print("Ocurrio un error al intentar leer los scores del archivo scores.txt")
-
-        archivo_scores = open("scores.txt","r")
-        mejor = archivo_scores.read()      
-        
+                
         if(mejor):
-            self.best_score = int(mejor)
-        
-        archivo_scores.close()
+            self.best_score = int(mejor)                
     
     def guardarScore(self):
         if(self.score > self.best_score):
-            archivo_scores = open("scores.txt","w")
+            archivo_scores = open("scores.txt","w+")
             archivo_scores.write(str(self.score))
             archivo_scores.close()
+    
+    def getScore(self):
+        return self.score
             
     def showScore(self):
         return score
@@ -51,99 +52,121 @@ class score():
         display.blit(textsurface, (10, 30))
         
 
-    def verificarPunto(self, Food, Snake):
-        coord_Food = Food.getCoord()
-        coord_snake = Snake.getCoordBody()
+    def verificarPunto(self, food, snake,velocity):
+        coord_Food = food.getCoord()
+        coord_snake = snake.getCoordBody()
 
-        if(math.fabs(coord_snake[0][0]-coord_Food[0]) < 10 and math.fabs(coord_snake[0][1]-coord_Food[1]) < 10):
+        if(math.fabs(coord_snake[0][0]-coord_Food[0]) <= velocity and math.fabs(coord_snake[0][1]-coord_Food[1]) <= velocity):
             return True
         return False
 
-    def verificarAutoEat(self, Snake):
-        coord_snake = Snake.getCoordBody()
+    def verificarAutoEat(self, snake,velocity):
+        coord_snake = snake.getCoordBody()
+        #print(coord_snake)
         cabeza = coord_snake[0]
 
         for i in range(1, len(coord_snake)):
-            if(math.fabs(cabeza[0] - coord_snake[i][0]) < 10 and math.fabs(cabeza[1] - coord_snake[i][1]) < 10):
+            if(math.fabs(cabeza[0] - coord_snake[i][0]) < velocity-1 and math.fabs(cabeza[1] - coord_snake[i][1]) < velocity-1):
+                #print("Se comio:",cabeza[0],"a",coord_snake[i][0],"y\nSe comio:",cabeza[1],"a",coord_snake[i][1],"vel:",velocity)                
                 return True, i
         return False, 0
     
+    def scoreLevelUp(self,display):
+        myfont = pygame.font.SysFont('Comic Sans MS', 30)
+        texto = 'LEVEL UP!!!'
+        textsurface = myfont.render(texto, True, GREEN)
+        display.blit(textsurface, (250, 10))
+        
+    def verificarGame_Over(self,snake,tam):
+        serpiente = snake.getBody()
+        if(serpiente[0].coordx <= 0 or
+           serpiente[0].coordx >= tam or
+           serpiente[0].coordy <= 0 or
+           serpiente[0].coordy >= tam ):
+            return True
     
+    def scorePantallaGameOver(self,display,tam):
+        myfont = pygame.font.SysFont('Comic Sans MS', 30)
+        texto = 'GAME OVER'
+        texto2 = 'Puntuación:'+str(self.score)
+        textsurface = myfont.render(texto, True, GREEN)
+        textsurface2 = myfont.render(texto2, True, GREEN)
+        display.blit(textsurface, (tam//2, tam//2))
+        display.blit(textsurface2, (tam//2, tam//2+30))
+        
 
-
-class snake():
-    Body = []
+class Snake():
+    body = []
     height = 10
     width = 10
 
     def __init__(self, coordx=0, coordy=0, diry=0, dirx=0):
-        self.Body.append(body(coordx, coordy, dirx, diry))
+        self.body.append(Body(coordx, coordy, dirx, diry))
 
     def getBody(self):
-        return self.Body
+        return self.body
 
     def getSnakeLenght(self):
-        return len(self.Body)
+        return len(self.body)
 
     def getCoordBody(self):
-        return [i.getCoord() for i in self.Body]
+        return [i.getCoord() for i in self.body]
 
     def getCoordElement(self, index):
         try:
-            return self.Body[index].getCoord()
+            return self.body[index].getCoord()
         except:
-            return self.Body[-1].getCoord()
+            return self.body[-1].getCoord()
 
     def getDirectionElement(self, index):
         try:
-            return self.Body[index].getDir()
+            return self.body[index].getDir()
         except:
-            return self.Body[-1].getDir()
+            return self.body[-1].getDir()
 
     def setDirectionElement(self, index, dirx, diry):
         try:
-            self.Body[index].setDir(dirx, diry)
+            self.body[index].setDir(dirx, diry)
         except:
-            print("Error")
+            print("Error en la escritura de dirección en",index)
 
-    def mover(self, dirx, diry):
-        self.Body[0].dirx = dirx
-        self.Body[0].diry = diry
+    def mover(self, dirx, diry):                                
+        self.body[0].dirx = dirx
+        self.body[0].diry = diry
 
-        for i in self.Body:
+        for i in self.body:
             i.coordx += i.dirx
             i.coordy += i.diry
 
-        direcciones = self.Body.copy()
+        direcciones = self.body.copy()
 
-        for i in range(len(self.Body)-1, 0, -1):
-            self.Body[i].dirx = direcciones[i-1].dirx
-            self.Body[i].diry = direcciones[i-1].diry
+        for i in range(len(self.body)-1, 0, -1):
+            self.body[i].dirx = direcciones[i-1].dirx
+            self.body[i].diry = direcciones[i-1].diry
         # print(self.Body)
 
     def eliminarSnake(self, from_=0):
         aux = 0
-        for i in range(from_, len(self.Body)):
-            del self.Body[i-aux]
+        for i in range(from_, len(self.body)):
+            del self.body[i-aux]
             aux += 1
 
-    def getTam(self):
-        return len(self.Body)
-
     def dibujarSnake(self, display):
-        for i in self.Body:
+        for i in self.body:
             pygame.draw.rect(
                 display, GREEN, (i.coordx, i.coordy, self.height, self.width))
 
-    def agregarBody(self):
+    def agregarBody(self,velocity):
         coord = self.getCoordElement(-1)
         direction = self.getDirectionElement(-1)
-        self.Body.append(
-            body(coord[0]-direction[0], coord[1]-direction[1], direction[0], direction[1]))
+                
+        self.body.append(
+            Body(coord[0]-direction[0], coord[1]-direction[1], direction[0], direction[1]))
         print("YUMMY")
+            
 
 
-class body():
+class Body():
     dirx = 0
     diry = 0
     coordx = 0
@@ -173,7 +196,7 @@ class body():
         return "("+str(self.coordx)+","+str(self.coordy)+")"
 
 
-class food():
+class Food():
     coordx = 0
     coordy = 0
     height = 10

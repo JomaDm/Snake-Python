@@ -11,15 +11,18 @@ if __name__ == "__main__":
     display = pygame.display.set_mode((tam, tam))
     pygame.display.set_caption("Snake")
 
-    Score = score()
-    Snake = snake(255, 255)
-    Food = food(rd.randint(tam//10, tam-tam//10),
+    score = Score()
+    snake = Snake(255, 255)
+    food = Food(rd.randint(tam//10, tam-tam//10),
                 rd.randint(tam//10, tam-tam//10))
 
     game_over = False
     clk = pygame.time.Clock()
+    next_level_at = 5
+    aux_level = 0
+    separation = 12
     dirx = 0
-    diry = 0
+    diry = 0        
 
     while not game_over:
         pygame.time.delay(60)
@@ -31,41 +34,63 @@ if __name__ == "__main__":
                 game_over = True
             if(evento.type == pygame.KEYDOWN):
                 if(evento.key == pygame.K_LEFT or evento.key == pygame.K_a):
-                    if(dirx != 10):
-                        dirx = -10
+                    if(dirx != separation):
+                        dirx = -separation
                         diry = 0
                 elif(evento.key == pygame.K_RIGHT or evento.key == pygame.K_d):
-                    if(dirx != -10):
-                        dirx = 10
+                    if(dirx != -separation):
+                        dirx = separation
                         diry = 0
                 elif(evento.key == pygame.K_DOWN or evento.key == pygame.K_s):
-                    if(diry != -10):
+                    if(diry != -separation):
                         dirx = 0
-                        diry = 10
+                        diry = separation
                 elif(evento.key == pygame.K_UP or evento.key == pygame.K_w):
-                    if(diry != 10):
+                    if(diry != separation):
                         dirx = 0
-                        diry = -10
+                        diry = -separation
                 elif(evento.key == pygame.K_ESCAPE):
                     game_over = True
-                    Score.guardarScore()
+                    score.guardarScore()
 
-        Snake.mover(dirx, diry)
-        Snake.dibujarSnake(display)
+        snake.mover(dirx, diry)
+        snake.dibujarSnake(display)
 
-        if(Score.verificarPunto(Food, Snake)):
-            Score.cambioScore(1)
-            Snake.agregarBody()
-            Food = food(rd.randint(tam//10, tam-tam//10),
+        if(score.verificarPunto(food, snake,separation)):
+            score.cambioScore(1)            
+            snake.agregarBody(separation)
+            food = Food(rd.randint(tam//10, tam-tam//10),
                         rd.randint(tam//10, tam-tam//10))
+        if(score.getScore() % next_level_at == 0 and score.getScore() != 0):                                                 
+            score.scoreLevelUp(display)            
+                                                                                                     
 
-        AutoEat, index = Score.verificarAutoEat(Snake)
-        if(AutoEat):
-            longitud_snake = Snake.getSnakeLenght()
-            Snake.eliminarSnake(index)
-            Score.cambioScore(-longitud_snake+index)
-            print("OUCH!!")
-        Food.dibujarFood(display)
-        Score.dibujarScore(display)
+        autoEat, index = score.verificarAutoEat(snake,separation)
+        if(autoEat):
+            longitud_snake = snake.getSnakeLenght()
+            snake.eliminarSnake(index)
+            score.cambioScore(-longitud_snake+index)
+            print("OUCH!!") 
+                               
+        food.dibujarFood(display)
+        score.dibujarScore(display)
+        
+        if(score.verificarGame_Over(snake,tam)):
+            game_over = True
+            score.guardarScore()
 
         pygame.display.update()
+        
+    
+    salir = 0
+    while salir == 0:
+        eventos = pygame.event.get()
+        for evento in eventos:
+            if(evento.type == pygame.QUIT):
+                    salir = 1
+            if(evento.type == pygame.KEYDOWN):                
+                if evento.key == pygame.K_ESCAPE:                                    
+                    salir = 1        
+        score.scorePantallaGameOver(display,tam)                    
+        pygame.display.update()
+    
